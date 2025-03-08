@@ -1,0 +1,24 @@
+{
+  "name": "ebuddy-home-assignment",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "dev": "turbo run dev"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@next/eslint-plugin-next": "^14.2.23",
+    "turbo": "^2.4.4"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "packageManager": "pnpm@8.15.4"
+}
