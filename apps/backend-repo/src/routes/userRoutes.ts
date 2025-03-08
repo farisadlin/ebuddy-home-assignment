@@ -20,11 +20,18 @@ router.get('/', authMiddleware, userController.fetchUserData.bind(userController
 router.get('/:id', authMiddleware, userController.fetchUserData.bind(userController));
 
 /**
+ * @route   POST /api/users/login
+ * @desc    Login with existing user credentials
+ * @access  Public
+ */
+router.post('/login', userController.login.bind(userController));
+
+/**
  * @route   POST /api/users
  * @desc    Create a new user
- * @access  Private
+ * @access  Public
  */
-router.post('/', authMiddleware, userController.createUser.bind(userController));
+router.post('/', userController.createUser.bind(userController));
 
 /**
  * @route   PUT /api/users/:id

@@ -38,3 +38,6 @@ Thumbs.db
 
 # Turbo
 .turbo
+
+# Firebase service account
+serviceAccount.json

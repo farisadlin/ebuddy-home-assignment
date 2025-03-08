@@ -1,9 +1,9 @@
-import express, { Application, Request, Response } from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import dotenv from 'dotenv';
-import userRoutes from '../routes/userRoutes';
-import { createServer } from 'http';
+import express, { Application, Request, Response } from "express";
+import cors from "cors";
+import helmet from "helmet";
+import dotenv from "dotenv";
+import userRoutes from "../routes/userRoutes";
+import { createServer } from "http";
 
 // Load environment variables
 dotenv.config();
@@ -20,26 +20,26 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.use('/api/users', userRoutes);
+app.use("/api/users", userRoutes);
 
 // Health check route
-app.get('/health', (req: Request, res: Response) => {
+app.get("/health", (req: Request, res: Response) => {
   res.status(200).json({
     success: true,
-    message: 'Server is running',
-    timestamp: new Date()
+    message: "Server is running",
+    timestamp: new Date(),
   });
 });
 
 // Root route
-app.get('/', (req: Request, res: Response) => {
+app.get("/", (req: Request, res: Response) => {
   res.status(200).json({
     success: true,
-    message: 'Welcome to the Backend API',
+    message: "Welcome to the Backend API",
     endpoints: {
-      users: '/api/users',
-      health: '/health'
-    }
+      users: "/api/users",
+      health: "/health",
+    },
   });
 });
 
@@ -47,7 +47,7 @@ app.get('/', (req: Request, res: Response) => {
 app.use((req: Request, res: Response) => {
   res.status(404).json({
     success: false,
-    message: 'Route not found'
+    message: "Route not found",
   });
 });
 
@@ -56,21 +56,16 @@ const server = createServer(app);
 
 // Function to start the server on an available port
 const startServer = (port: number) => {
-  server.once('error', (error: NodeJS.ErrnoException) => {
-    if (error.code === 'EADDRINUSE') {
-      console.log(`Port ${port} is in use, trying port ${port + 1}...`);
+  server.once("error", (error: NodeJS.ErrnoException) => {
+    if (error.code === "EADDRINUSE") {
       // Close the server and try the next port
       server.close();
       startServer(port + 1);
-    } else {
-      console.error('Server error:', error);
     }
   });
 
   server.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-    console.log(`Health check: http://localhost:${port}/health`);
-    console.log(`API endpoint: http://localhost:${port}/api/users`);
+    // Server is now running
   });
 };
 

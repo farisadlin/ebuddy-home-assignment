@@ -1,8 +1,12 @@
-import { db } from '../config/firebaseConfig';
-import { User, UserUpdateRequest } from '../entities/user';
+import { db, FirestoreImplementation } from "../config/firebaseConfig";
+import { User, UserUpdateRequest } from "../entities/user";
+import * as admin from "firebase-admin";
 
 // Collection reference
-const usersCollection = db.collection('USERS');
+const USERS_COLLECTION = "USERS";
+const usersCollection = (db as FirestoreImplementation).collection(
+  USERS_COLLECTION
+);
 
 /**
  * User repository class for interacting with Firestore
@@ -16,18 +20,17 @@ export class UserRepository {
   async getUserById(userId: string): Promise<User | null> {
     try {
       const userDoc = await usersCollection.doc(userId).get();
-      
+
       if (!userDoc.exists) {
         return null;
       }
-      
-      const userData = userDoc.data() as Omit<User, 'id'>;
+
+      const userData = userDoc.data() as Omit<User, "id">;
       return {
         id: userDoc.id,
-        ...userData
+        ...userData,
       };
     } catch (error) {
-      console.error('Error fetching user:', error);
       throw error;
     }
   }
@@ -38,14 +41,18 @@ export class UserRepository {
    */
   async getAllUsers(): Promise<User[]> {
     try {
-      const usersSnapshot = await usersCollection.get();
+      const snapshot = await usersCollection.get();
+
+      const users = snapshot.docs.map((doc) => {
+        const data = doc.data() || {};
+        return {
+          id: doc.id,
+          ...(data as Omit<User, "id">),
+        };
+      });
       
-      return usersSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...(doc.data() as Omit<User, 'id'>)
-      }));
+      return users;
     } catch (error) {
-      console.error('Error fetching all users:', error);
       throw error;
     }
   }
@@ -60,20 +67,19 @@ export class UserRepository {
     try {
       const updateData = {
         ...userData,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
-      
+
       await usersCollection.doc(userId).update(updateData);
-      
+
       // Fetch and return the updated user
       const updatedUser = await this.getUserById(userId);
       if (!updatedUser) {
-        throw new Error('User not found after update');
+        throw new Error("User not found after update");
       }
-      
+
       return updatedUser;
     } catch (error) {
-      console.error('Error updating user:', error);
       throw error;
     }
   }
@@ -83,23 +89,26 @@ export class UserRepository {
    * @param userData - The user data to create
    * @returns Promise resolving to the created user data
    */
-  async createUser(userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
+  async createUser(
+    userData: Omit<User, "id" | "createdAt" | "updatedAt">
+  ): Promise<User> {
     try {
-      const now = new Date();
+      const timestamp = new Date();
       const newUser = {
         ...userData,
-        createdAt: now,
-        updatedAt: now
+        createdAt: timestamp,
+        updatedAt: timestamp,
       };
-      
+
       const docRef = await usersCollection.add(newUser);
-      
+
       return {
         id: docRef.id,
-        ...newUser
+        ...userData,
+        createdAt: timestamp,
+        updatedAt: timestamp,
       };
     } catch (error) {
-      console.error('Error creating user:', error);
       throw error;
     }
   }
@@ -114,7 +123,6 @@ export class UserRepository {
       await usersCollection.doc(userId).delete();
       return true;
     } catch (error) {
-      console.error('Error deleting user:', error);
       throw error;
     }
   }
