@@ -1,6 +1,5 @@
 import { db, FirestoreImplementation } from "../config/firebaseConfig";
 import { User, UserUpdateRequest } from "../entities/user";
-import * as admin from "firebase-admin";
 
 // Collection reference
 const USERS_COLLECTION = "USERS";
@@ -50,7 +49,7 @@ export class UserRepository {
           ...(data as Omit<User, "id">),
         };
       });
-      
+
       return users;
     } catch (error) {
       throw error;
@@ -108,20 +107,6 @@ export class UserRepository {
         createdAt: timestamp,
         updatedAt: timestamp,
       };
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Delete a user by ID
-   * @param userId - The user ID to delete
-   * @returns Promise resolving to a boolean indicating success
-   */
-  async deleteUser(userId: string): Promise<boolean> {
-    try {
-      await usersCollection.doc(userId).delete();
-      return true;
     } catch (error) {
       throw error;
     }
