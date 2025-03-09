@@ -69,7 +69,10 @@ const startServer = (port: number) => {
   });
 };
 
-// Start the server
-startServer(PORT);
+// Only start the server if this file is run directly (not when imported as a module)
+if (require.main === module) {
+  startServer(PORT);
+  console.log(`Server started on port ${PORT}`);
+}
 
 export default app;

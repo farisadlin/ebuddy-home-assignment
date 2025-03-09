@@ -1,0 +1,21 @@
+{
+  "hosting": {
+    "public": "dist",
+    "rewrites": [
+      {
+        "source": "**",
+        "function": "api"
+      }
+    ]
+  },
+  "emulators": {
+    "hosting": {
+      "port": 5001,
+      "host": "0.0.0.0"
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4000
+    }
+  }
+}

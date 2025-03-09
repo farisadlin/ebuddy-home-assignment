@@ -6,7 +6,21 @@ import {
 } from "../../../types/user";
 
 // Base URL for API calls
-const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api`;
+// Check if we should use local development server
+const useLocalDev = process.env.NEXT_PUBLIC_USE_LOCAL_DEV === 'true';
+
+// Set the API base URL based on environment
+let API_BASE_URL: string;
+
+if (useLocalDev) {
+  // Use the local Express server running on port 9090
+  const localHost = process.env.NEXT_PUBLIC_LOCAL_DEV_HOST || 'localhost';
+  const localPort = process.env.NEXT_PUBLIC_LOCAL_DEV_PORT || '9090';
+  API_BASE_URL = `http://${localHost}:${localPort}/api`;
+} else {
+  // Use the configured API base URL
+  API_BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api`;
+}
 
 // Helper function to handle fetch requests
 const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
