@@ -232,12 +232,28 @@ export class UserController {
       // Create the user with plain text password
       const newUser = await userRepository.createUser(userData);
 
+      // Generate JWT token - same as login endpoint
+      const jwtSecret = process.env.JWT_SECRET || "your-jwt-secret";
+      const token = jwt.sign(
+        {
+          uid: newUser.id,
+          email: newUser.email,
+          role: newUser.role || "user",
+        },
+        jwtSecret,
+        { expiresIn: "1d", algorithm: "HS256" }
+      );
+
       // Remove password from response
       const { password: _, ...newUserWithoutPassword } = newUser;
 
+      // Return response in the same format as login endpoint
       res.status(201).json({
         success: true,
-        data: newUserWithoutPassword,
+        data: {
+          user: newUserWithoutPassword,
+          token,
+        },
         message: "User created successfully",
       });
     } catch (error) {

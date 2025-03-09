@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
+import Link from "next/link";
 import {
   Box,
   Button,
@@ -143,7 +144,7 @@ const LoginPage = () => {
                   color="primary"
                   size="large"
                   disabled={loading}
-                  sx={{ py: 1.5 }}
+                  sx={{ py: 1.5, mb: 2 }}
                   type="submit"
                 >
                   {loading ? (
@@ -152,6 +153,21 @@ const LoginPage = () => {
                     "Login"
                   )}
                 </Button>
+                
+                <Box textAlign="center">
+                  <Typography variant="body2" color="text.secondary">
+                    Don&apos;t have an account?{" "}
+                    <Link href="/register" style={{ textDecoration: "none" }}>
+                      <Typography
+                        component="span"
+                        color="primary"
+                        sx={{ cursor: "pointer" }}
+                      >
+                        Register here
+                      </Typography>
+                    </Link>
+                  </Typography>
+                </Box>
               </form>
             </CardContent>
           </Card>

@@ -151,7 +151,7 @@ export const updateUserData = onRequest((request, response) => {
   });
 });
 
-// Create user endpoint
+// Create user endpoint - handles user registration and returns auth token
 export const createUser = onRequest((request, response) => {
   corsHandler(request, response, () => {
     try {
@@ -162,18 +162,73 @@ export const createUser = onRequest((request, response) => {
         return;
       }
 
-      const userData = request.body;
+      const { name, email, password } = request.body;
+
+      // Validate required fields
+      if (!name || !email || !password) {
+        response
+          .status(400)
+          .json(wrapResponse(
+            false,
+            null,
+            "Name, email, and password are required"
+          ));
+        return;
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        response
+          .status(400)
+          .json(wrapResponse(false, null, "Invalid email format"));
+        return;
+      }
+
+      // Check if email already exists
+      const existingUser = mockUsers.find((u) => u.email === email);
+      if (existingUser) {
+        response
+          .status(409)
+          .json(wrapResponse(false, null, "Email already in use"));
+        return;
+      }
 
       // Create a new user
       const newUser = {
         id: (mockUsers.length + 1).toString(),
-        ...userData,
+        name,
+        email,
+        password, // In a real app, this would be hashed
+        role: "user", // Default role
+        isActive: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
 
+      // Add user to mock database
       mockUsers.push(newUser);
-      response.status(201).json(wrapResponse(true, newUser));
+
+      // Generate token for authorization - same format as login endpoint
+      const token = "mock-jwt-token-" + Date.now();
+
+      // Store token in a real app (this would be in a database or auth service)
+      // For this mock implementation, we're just generating it
+
+      // Return success with user data and token (excluding password)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password: _unused_, ...userWithoutPassword } = newUser;
+
+      // Return in the same format as login endpoint for consistency
+      response.status(201).json(
+        wrapResponse(true, {
+          user: userWithoutPassword,
+          token, // Token for authorization
+        }, "User registered successfully")
+      );
+
+      // Log successful registration
+      logger.info(`User registered successfully: ${email}`);
     } catch (error) {
       logger.error("Error creating user:", error);
       response.status(500).json(wrapResponse(false, null, "Server error"));

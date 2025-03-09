@@ -3,6 +3,13 @@ import { userApi } from "../apis/userApi";
 import { LoginRequest, User, LoginResponse } from "../../../types/user";
 import { RootState } from "./store";
 
+// Define the registration request interface
+interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
 // Define the authentication state interface
 interface AuthState {
   user: User | null;
@@ -32,6 +39,35 @@ const initialState: AuthState = {
 };
 
 // Async thunks
+export const register = createAsyncThunk(
+  "auth/register",
+  async (userData: RegisterRequest, { rejectWithValue }) => {
+    try {
+      // userApi.register already handles storing the token in localStorage
+      const response = await userApi.register(userData);
+      if (!response.success) {
+        return rejectWithValue(response.message || "Registration failed");
+      }
+
+      return response;
+    } catch (error: unknown) {
+      const errorResponse = error as {
+        response?: {
+          data?: {
+            message?: string;
+          };
+        };
+        message?: string;
+      };
+      return rejectWithValue(
+        errorResponse.response?.data?.message ||
+          errorResponse.message ||
+          "Registration failed"
+      );
+    }
+  }
+);
+
 export const login = createAsyncThunk(
   "auth/login",
   async (credentials: LoginRequest, { rejectWithValue }) => {
@@ -158,6 +194,26 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Register
+      .addCase(register.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        register.fulfilled,
+        (state, action: PayloadAction<LoginResponse>) => {
+          state.loading = false;
+          state.isAuthenticated = true;
+          state.token = action.payload.data?.token || null;
+          state.error = null;
+          state.fetchSuccess = "Registration successful! Welcome aboard!";
+        }
+      )
+      .addCase(register.rejected, (state, action) => {
+        state.loading = false;
+        state.isAuthenticated = false;
+        state.error = action.payload as string;
+      })
       // Login
       .addCase(login.pending, (state) => {
         state.loading = true;

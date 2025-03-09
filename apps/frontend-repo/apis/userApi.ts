@@ -5,25 +5,34 @@ import {
   LoginResponse,
 } from "../../../types/user";
 
+// Registration request interface
+interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
 // Base URL for API calls
 // Check if we should use local development server
-const useLocalDev = process.env.NEXT_PUBLIC_USE_LOCAL_DEV === 'true';
+const useLocalDev = process.env.NEXT_PUBLIC_USE_LOCAL_DEV === "true";
 
 // Check if we should use Firebase emulator
-const useFirebaseEmulator = process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true';
+const useFirebaseEmulator =
+  process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === "true";
 
 // Set the API base URL based on environment
 let API_BASE_URL: string;
 
 if (useFirebaseEmulator) {
   // Use the Firebase Functions emulator running on port 5001
-  const emulatorHost = process.env.NEXT_PUBLIC_FIREBASE_EMULATOR_HOST || 'localhost';
-  const emulatorPort = process.env.NEXT_PUBLIC_FIREBASE_EMULATOR_PORT || '5001';
+  const emulatorHost =
+    process.env.NEXT_PUBLIC_FIREBASE_EMULATOR_HOST || "localhost";
+  const emulatorPort = process.env.NEXT_PUBLIC_FIREBASE_EMULATOR_PORT || "5001";
   API_BASE_URL = `http://${emulatorHost}:${emulatorPort}/ebuddy-home-assignment/us-central1`;
 } else if (useLocalDev) {
   // Use the local Express server running on port 9090
-  const localHost = process.env.NEXT_PUBLIC_LOCAL_DEV_HOST || 'localhost';
-  const localPort = process.env.NEXT_PUBLIC_LOCAL_DEV_PORT || '9090';
+  const localHost = process.env.NEXT_PUBLIC_LOCAL_DEV_HOST || "localhost";
+  const localPort = process.env.NEXT_PUBLIC_LOCAL_DEV_PORT || "9090";
   API_BASE_URL = `http://${localHost}:${localPort}/api`;
 } else {
   // Use the configured API base URL
@@ -70,6 +79,33 @@ const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
  * API client for user-related operations
  */
 export const userApi = {
+  /**
+   * Register a new user
+   * @param userData - The user registration data
+   * @returns Promise resolving to the login response with user data and token
+   */
+  async register(userData: RegisterRequest): Promise<LoginResponse> {
+    try {
+      const data = await fetchWithAuth(`${API_BASE_URL}/users/create`, {
+        method: "POST",
+        body: JSON.stringify(userData),
+      });
+
+      // Store the token in localStorage for future requests
+      if (data.data?.token) {
+        localStorage.setItem("authToken", data.data.token);
+        console.log("User registered successfully and token stored for authorization");
+      } else {
+        console.warn("Registration successful but no token received from server");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error during registration:", error);
+      throw error;
+    }
+  },
+
   /**
    * Login with email and password
    * @param credentials - The login credentials

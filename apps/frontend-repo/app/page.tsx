@@ -83,6 +83,9 @@ export default function Home() {
     }
   }, [isAuthenticated, router]);
 
+  // We don't automatically fetch user data on mount anymore
+  // User data is already available from login/registration
+
   // Handle Redux auth error
   useEffect(() => {
     if (authError) {
@@ -177,10 +180,11 @@ export default function Home() {
     }
   };
 
-  // Fetch user data using Redux
+  // Fetch user data using Redux - only when explicitly requested by the user
   const fetchUserData = useCallback(async () => {
     setError(null);
 
+    // Only fetch if we don't already have user data or if the user explicitly requests a refresh
     try {
       // Dispatch the Redux action to fetch user profile
       const resultAction = await dispatch(fetchUserProfile());
@@ -236,8 +240,9 @@ export default function Home() {
 
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body1" paragraph>
-                  Click the button below to fetch the latest user data from the
-                  server.
+                  {user
+                    ? "Click the button below to refresh your user data from the server."
+                    : "Click the button below to fetch your user data from the server."}
                 </Typography>
 
                 <Button
@@ -249,11 +254,11 @@ export default function Home() {
                   fullWidth={isMobile}
                   sx={{ mb: 2 }}
                 >
+                  {user ? "Refresh User Data" : "Fetch User Data"}
+
                   {authLoading ? (
                     <CircularProgress size={24} color="inherit" />
-                  ) : (
-                    "Fetch User Data"
-                  )}
+                  ) : null}
                 </Button>
               </Box>
 
