@@ -113,11 +113,8 @@ pnpm dev
 - `POST /api/users/create` - User registration (returns user data and JWT token)
 
 ### User Management
-- `GET /api/users` - Fetch all users (requires authentication)
-- `GET /api/users/:id` - Fetch user by ID (requires authentication)
-- `GET /api/users/profile` - Fetch current user profile (requires authentication)
-- `PUT /api/users/:id` - Update user data (requires authentication)
-- `DELETE /api/users/:id` - Delete a user (requires authentication)
+- `GET /api/fetch-user-data` - Fetch current user profile (requires authentication)
+- `PUT /api/update-user-data/:id` - Update user data (requires authentication)
 
 ## Recent Enhancements
 

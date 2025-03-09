@@ -35,24 +35,25 @@ backend-repo/
 ## API Endpoints
 
 ### Authentication
+
 - `POST /api/users/login` - User login (returns JWT token)
 - `POST /api/users/create` - User registration (returns user data and JWT token)
 
 ### User Management
-- `GET /api/users` - Fetch all users (requires authentication)
-- `GET /api/users/:id` - Fetch user by ID (requires authentication)
-- `GET /api/users/profile` - Fetch current user profile (requires authentication)
-- `PUT /api/users/:id` - Update user data (requires authentication)
-- `DELETE /api/users/:id` - Delete a user (requires authentication)
+
+- `GET /api/fetch-user-data` - Fetch current user profile (requires authentication)
+- `PUT /api/update-user-data/:id` - Update user data (requires authentication)
 
 ## Setup
 
 1. Install dependencies:
+
    ```
    pnpm install
    ```
 
 2. Create a `.env` file based on `.env.example` and add your Firebase credentials and JWT secret:
+
    ```
    FIREBASE_API_KEY=your_firebase_api_key
    FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
@@ -71,12 +72,14 @@ backend-repo/
 ## Authentication Flow
 
 1. **Registration**: When a user registers, the system:
+
    - Validates the input data
    - Creates a new user in the database
    - Generates a JWT token containing the user's ID, email, and role
    - Returns both the user data and token in the response
 
 2. **Login**: When a user logs in, the system:
+
    - Validates credentials against the database
    - Generates a JWT token if authentication is successful
    - Returns both the user data and token in the response
@@ -100,17 +103,20 @@ The API implements consistent error handling with appropriate HTTP status codes 
 ## Development
 
 To run the tests:
+
 ```
 pnpm test
 ```
 
 To build for production:
+
 ```
 pnpm build
 ```
-   ```
-   pnpm dev
-   ```
+
+```
+pnpm dev
+```
 
 4. For production build:
    ```
