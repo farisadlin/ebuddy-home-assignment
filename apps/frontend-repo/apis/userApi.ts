@@ -1,20 +1,48 @@
-import axios from "axios";
-import { User, UserUpdateRequest, LoginRequest, LoginResponse } from "./user";
+import {
+  User,
+  UserUpdateRequest,
+  LoginRequest,
+  LoginResponse,
+} from "../../../types/user";
 
 // Base URL for API calls
 const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api`;
 
-// Configure axios defaults
-axios.defaults.headers.common["Content-Type"] = "application/json";
+// Helper function to handle fetch requests
+const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+  // Default headers
+  const headers = new Headers({
+    "Content-Type": "application/json",
+    ...options.headers,
+  });
 
-// Add auth token to requests if available
-axios.interceptors.request.use((config) => {
-  const token = localStorage.getItem("authToken");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  // Add auth token if available
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      headers.append("Authorization", `Bearer ${token}`);
+    }
   }
-  return config;
-});
+
+  // Merge options with headers
+  const fetchOptions: RequestInit = {
+    ...options,
+    headers,
+  };
+
+  // Execute fetch
+  const response = await fetch(url, fetchOptions);
+
+  // Check if the response is ok
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(
+      errorData.message || `Request failed with status ${response.status}`
+    );
+  }
+
+  return response.json();
+};
 
 /**
  * API client for user-related operations
@@ -27,30 +55,32 @@ export const userApi = {
    */
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/users/login`,
-        credentials
-      );
+      const data = await fetchWithAuth(`${API_BASE_URL}/users/login`, {
+        method: "POST",
+        body: JSON.stringify(credentials),
+      });
+
       // Store the token in localStorage for future requests
-      if (response.data.data?.token) {
-        localStorage.setItem("authToken", response.data.data.token);
+      if (data.data?.token) {
+        localStorage.setItem("authToken", data.data.token);
       }
-      return response.data;
+
+      return data;
     } catch (error) {
       console.error("Error during login:", error);
       throw error;
     }
   },
   /**
-   * Fetch all users
-   * @returns Promise resolving to an array of users
+   * Fetch the current user's profile
+   * @returns Promise resolving to the user data
    */
-  async getAllUsers(): Promise<User[]> {
+  async getProfile(): Promise<User> {
     try {
-      const response = await axios.get(`${API_BASE_URL}/fetch-user-data`);
-      return response.data.data;
+      const data = await fetchWithAuth(`${API_BASE_URL}/fetch-user-data`);
+      return data.data;
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error("Error fetching user profile:", error);
       throw error;
     }
   },
@@ -62,8 +92,8 @@ export const userApi = {
    */
   async getUserById(userId: string): Promise<User> {
     try {
-      const response = await axios.get(`${API_BASE_URL}/users/${userId}`);
-      return response.data.data;
+      const data = await fetchWithAuth(`${API_BASE_URL}/users/${userId}`);
+      return data.data;
     } catch (error) {
       console.error(`Error fetching user ${userId}:`, error);
       throw error;
@@ -77,15 +107,45 @@ export const userApi = {
    * @returns Promise resolving to the updated user data
    */
   async updateUser(userId: string, userData: UserUpdateRequest): Promise<User> {
+    // Validate inputs
+    if (!userId) {
+      throw new Error("User ID is required for updating a user");
+    }
+
+    if (!userData || Object.keys(userData).length === 0) {
+      throw new Error("No update data provided");
+    }
+
     try {
-      const response = await axios.put(
-        `${API_BASE_URL}/update-user-data/${userId}`,
-        userData
+      // Log the update attempt
+      console.log(
+        `Attempting to update user ${userId} with data:`,
+        JSON.stringify(userData, null, 2)
       );
-      return response.data.data;
+
+      // Send the update request
+      const response = await fetchWithAuth(
+        `${API_BASE_URL}/update-user-data/${userId}`,
+        {
+          method: "PUT",
+          body: JSON.stringify(userData),
+        }
+      );
+
+      // Process the response
+      if (!response.success) {
+        throw new Error(response.message || "Failed to update user");
+      }
+
+      console.log(`User ${userId} updated successfully`);
+      return response.data;
     } catch (error) {
       console.error(`Error updating user ${userId}:`, error);
-      throw error;
+      // Rethrow with more context
+      if (error instanceof Error) {
+        throw new Error(`Failed to update user: ${error.message}`);
+      }
+      throw new Error("An unknown error occurred while updating user");
     }
   },
 
@@ -98,8 +158,11 @@ export const userApi = {
     userData: Omit<User, "id" | "createdAt" | "updatedAt">
   ): Promise<User> {
     try {
-      const response = await axios.post(`${API_BASE_URL}/users`, userData);
-      return response.data.data;
+      const data = await fetchWithAuth(`${API_BASE_URL}/users/create`, {
+        method: "POST",
+        body: JSON.stringify(userData),
+      });
+      return data.data;
     } catch (error) {
       console.error("Error creating user:", error);
       throw error;

@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { AuthenticatedRequest } from "../middleware/authMiddleware";
 import { UserRepository } from "../repository/userCollection";
 import { UserUpdateRequest } from "../entities/user";
 import jwt from "jsonwebtoken";
@@ -147,6 +148,19 @@ export class UserController {
         return;
       }
 
+      // Extract update data from request body
+      const updateData: UserUpdateRequest = req.body;
+
+      // Validate update data
+      if (!updateData || Object.keys(updateData).length === 0) {
+        res.status(400).json({
+          success: false,
+          message: "No update data provided",
+          data: null,
+        });
+        return;
+      }
+
       // Validate that the user exists
       const existingUser = await userRepository.getUserById(userId);
 
@@ -159,18 +173,36 @@ export class UserController {
         return;
       }
 
-      // Extract update data from request body
-      const updateData: UserUpdateRequest = req.body;
+      // Validate email uniqueness if email is being updated
+      if (updateData.email && updateData.email !== existingUser.email) {
+        const users = await userRepository.getAllUsers();
+        const emailExists = users.some(
+          (u) => u.id !== userId && u.email === updateData.email
+        );
+
+        if (emailExists) {
+          res.status(409).json({
+            success: false,
+            message: "Email already in use by another user",
+            data: null,
+          });
+          return;
+        }
+      }
 
       // Update the user
       const updatedUser = await userRepository.updateUser(userId, updateData);
 
+      // Remove password from response
+      const { password: _, ...userWithoutPassword } = updatedUser;
+
       res.status(200).json({
         success: true,
-        data: updatedUser,
+        data: userWithoutPassword,
         message: "User updated successfully",
       });
     } catch (error) {
+      console.error(`Error updating user:`, error);
       res.status(500).json({
         success: false,
         error: "Failed to update user data",
@@ -212,6 +244,54 @@ export class UserController {
       res.status(500).json({
         success: false,
         error: "Failed to create user",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+
+  /**
+   * Get user profile - Returns the profile of the authenticated user
+   * @param req - Express request object with user data from auth middleware
+   * @param res - Express response object
+   */
+  async getUserProfile(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      // The auth middleware adds the user ID to the request object
+      const userId = req.user?.uid;
+
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          message: "Authentication required",
+          data: null,
+        });
+        return;
+      }
+
+      // Fetch the user by ID
+      const user = await userRepository.getUserById(userId);
+
+      if (!user) {
+        res.status(404).json({
+          success: false,
+          message: "User profile not found",
+          data: null,
+        });
+        return;
+      }
+
+      // Remove sensitive information before sending the response
+      const { password, ...userProfile } = user;
+
+      res.status(200).json({
+        success: true,
+        data: userProfile,
+        message: "User profile fetched successfully",
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: "Failed to fetch user profile",
         message: error instanceof Error ? error.message : "Unknown error",
       });
     }

@@ -6,28 +6,6 @@ const router = Router();
 const userController = new UserController();
 
 /**
- * @route   GET /api/fetch-user-data
- * @desc    Get all users
- * @access  Private
- */
-router.get(
-  "/fetch-user-data",
-  authMiddleware,
-  userController.fetchUserData.bind(userController)
-);
-
-/**
- * @route   GET /api/users/:id
- * @desc    Get user by ID
- * @access  Private
- */
-router.get(
-  "/:id",
-  authMiddleware,
-  userController.fetchUserData.bind(userController)
-);
-
-/**
  * @route   POST /api/users/login
  * @desc    Login with existing user credentials
  * @access  Public
@@ -50,6 +28,17 @@ router.put(
   "/update-user-data/:id",
   authMiddleware,
   userController.updateUserData.bind(userController)
+);
+
+/**
+ * @route   GET /api/profile
+ * @desc    Get the authenticated user's profile
+ * @access  Private
+ */
+router.get(
+  "/fetch-user-data",
+  authMiddleware,
+  userController.getUserProfile.bind(userController)
 );
 
 export default router;

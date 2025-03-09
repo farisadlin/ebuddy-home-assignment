@@ -15,8 +15,7 @@ import {
   Alert,
   useMediaQuery,
 } from "@mui/material";
-import { ThemeProvider } from "@mui/material/styles";
-import theme from "../../theme/theme";
+// Theme is already provided by providers.tsx
 import { login, selectAuth } from "../../store/authSlice";
 import { AppDispatch } from "../../store/store";
 
@@ -24,7 +23,7 @@ const LoginPage = () => {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const { loading, error, isAuthenticated } = useSelector(selectAuth);
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile = useMediaQuery("(max-width:600px)");
 
   const [formData, setFormData] = useState({
     email: "",
@@ -87,11 +86,10 @@ const LoginPage = () => {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <Container
-        maxWidth="sm"
-        sx={{ height: "100vh", display: "flex", alignItems: "center" }}
-      >
+    <Container
+      maxWidth="sm"
+      sx={{ height: "100vh", display: "flex", alignItems: "center" }}
+    >
         <Box width="100%">
           <Card elevation={3} sx={{ borderRadius: 2, overflow: "hidden" }}>
             <CardContent sx={{ p: isMobile ? 3 : 4 }}>
@@ -158,8 +156,7 @@ const LoginPage = () => {
             </CardContent>
           </Card>
         </Box>
-      </Container>
-    </ThemeProvider>
+    </Container>
   );
 };
 
