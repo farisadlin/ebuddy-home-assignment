@@ -1,25 +1,22 @@
-import { createStore, combineReducers, applyMiddleware } from 'redux';
-import { userReducer } from './reducers';
+import { configureStore } from '@reduxjs/toolkit';
 import { createWrapper } from 'next-redux-wrapper';
-import thunk from 'redux-thunk';
-
-// Combine reducers
-const rootReducer = combineReducers({
-  user: userReducer,
-  // Add other reducers here as needed
-});
-
-// Root state type
-export type RootState = ReturnType<typeof rootReducer>;
+import { userReducer } from './reducers';
+import authReducer from './authSlice';
 
 // Create the store
 export const makeStore = () => {
-  // Create store with thunk middleware
-  return createStore(
-    rootReducer,
-    applyMiddleware(thunk)
-  );
+  return configureStore({
+    reducer: {
+      user: userReducer,
+      auth: authReducer,
+      // Add other reducers here as needed
+    },
+    devTools: process.env.NODE_ENV !== 'production',
+  });
 };
+
+// Infer the RootState type from the store
+export type RootState = ReturnType<ReturnType<typeof makeStore>['getState']>;
 
 // Infer the type of makeStore
 export type AppStore = ReturnType<typeof makeStore>;

@@ -14,6 +14,27 @@ export interface User {
 }
 
 /**
+ * Login request interface for authentication
+ */
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+/**
+ * Login response interface for authentication
+ */
+export interface LoginResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    user: User;
+    token: string;
+  } | null;
+  error?: string;
+}
+
+/**
  * User request interface for updating user data
  */
 export interface UserUpdateRequest {

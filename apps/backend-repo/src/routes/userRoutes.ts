@@ -32,14 +32,14 @@ router.get(
  * @desc    Login with existing user credentials
  * @access  Public
  */
-router.post("/login", userController.login.bind(userController));
+router.post("/users/login", userController.login.bind(userController));
 
 /**
- * @route   POST /api/users
+ * @route   POST /api/users/create
  * @desc    Create a new user
  * @access  Public
  */
-router.post("/", userController.createUser.bind(userController));
+router.post("/users/create", userController.createUser.bind(userController));
 
 /**
  * @route   PUT /api/update-user-data/:id

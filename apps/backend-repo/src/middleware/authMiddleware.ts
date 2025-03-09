@@ -46,8 +46,6 @@ export const authMiddleware = async (
     // Extract the token
     const token = authHeader.split("Bearer ")[1];
 
-    console.log("Token received:", token);
-
     if (!token) {
       return res.status(401).json({
         success: false,
@@ -63,7 +61,6 @@ export const authMiddleware = async (
         decodedToken = await admin.auth().verifyIdToken(token);
       } catch (firebaseError) {
         // If Firebase verification fails, try JWT verification
-        console.log("Firebase verification failed, trying JWT...");
         const jwtSecret = process.env.JWT_SECRET || "your-jwt-secret";
 
         try {
