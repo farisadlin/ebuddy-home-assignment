@@ -4,18 +4,45 @@
     "rewrites": [
       {
         "source": "**",
-        "function": "api"
+        "destination": "/index.html"
       }
     ]
   },
   "emulators": {
     "hosting": {
-      "port": 5001,
+      "port": 5003,
       "host": "0.0.0.0"
     },
     "ui": {
       "enabled": true,
-      "port": 4000
+      "port": 4003
+    },
+    "hub": {
+      "port": 4402
+    },
+    "logging": {
+      "port": 4502
+    },
+    "singleProjectMode": true,
+    "functions": {
+      "port": 5002
     }
-  }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint",
+        "npm --prefix \"$RESOURCE_DIR\" run build"
+      ]
+    }
+  ]
 }

@@ -9,10 +9,18 @@ import {
 // Check if we should use local development server
 const useLocalDev = process.env.NEXT_PUBLIC_USE_LOCAL_DEV === 'true';
 
+// Check if we should use Firebase emulator
+const useFirebaseEmulator = process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true';
+
 // Set the API base URL based on environment
 let API_BASE_URL: string;
 
-if (useLocalDev) {
+if (useFirebaseEmulator) {
+  // Use the Firebase Functions emulator running on port 5001
+  const emulatorHost = process.env.NEXT_PUBLIC_FIREBASE_EMULATOR_HOST || 'localhost';
+  const emulatorPort = process.env.NEXT_PUBLIC_FIREBASE_EMULATOR_PORT || '5001';
+  API_BASE_URL = `http://${emulatorHost}:${emulatorPort}/ebuddy-home-assignment/us-central1`;
+} else if (useLocalDev) {
   // Use the local Express server running on port 9090
   const localHost = process.env.NEXT_PUBLIC_LOCAL_DEV_HOST || 'localhost';
   const localPort = process.env.NEXT_PUBLIC_LOCAL_DEV_PORT || '9090';

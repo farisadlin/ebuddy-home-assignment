@@ -8,10 +8,7 @@
     "dev": "ts-node-dev --respawn --transpile-only src/core/app.ts",
     "start": "node dist/core/app.js",
     "lint": "eslint . --ext .ts",
-    "test": "jest",
-    "serve": "firebase emulators:start --only functions",
-    "serve:dev": "npm run build && firebase emulators:start --only functions",
-    "deploy": "firebase deploy --only functions"
+    "test": "jest"
   },
   "dependencies": {
     "cors": "^2.8.5",
