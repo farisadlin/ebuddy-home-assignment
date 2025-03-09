@@ -168,7 +168,6 @@ const authSlice = createSlice({
         (state, action: PayloadAction<LoginResponse>) => {
           state.loading = false;
           state.isAuthenticated = true;
-          state.user = action.payload.data?.user || null;
           state.token = action.payload.data?.token || null;
         }
       )
@@ -182,10 +181,16 @@ const authSlice = createSlice({
         state.loading = true;
       })
       .addCase(logout.fulfilled, (state) => {
+        // Reset all state to initial values
         state.loading = false;
         state.isAuthenticated = false;
         state.user = null;
         state.token = null;
+        state.error = null;
+        state.fetchSuccess = null;
+        state.updateLoading = false;
+        state.updateError = null;
+        state.updateSuccess = null;
       })
       .addCase(logout.rejected, (state, action) => {
         state.loading = false;
@@ -197,11 +202,14 @@ const authSlice = createSlice({
         state.error = null;
         state.fetchSuccess = null;
       })
-      .addCase(fetchUserProfile.fulfilled, (state, action: PayloadAction<User>) => {
-        state.loading = false;
-        state.user = action.payload;
-        state.fetchSuccess = "User data fetched successfully!";
-      })
+      .addCase(
+        fetchUserProfile.fulfilled,
+        (state, action: PayloadAction<User>) => {
+          state.loading = false;
+          state.user = action.payload;
+          state.fetchSuccess = "User data fetched successfully!";
+        }
+      )
       .addCase(fetchUserProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
@@ -212,11 +220,14 @@ const authSlice = createSlice({
         state.updateError = null;
         state.updateSuccess = null;
       })
-      .addCase(updateUserProfile.fulfilled, (state, action: PayloadAction<User>) => {
-        state.updateLoading = false;
-        state.user = action.payload;
-        state.updateSuccess = "User updated successfully!";
-      })
+      .addCase(
+        updateUserProfile.fulfilled,
+        (state, action: PayloadAction<User>) => {
+          state.updateLoading = false;
+          state.user = action.payload;
+          state.updateSuccess = "User updated successfully!";
+        }
+      )
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.updateLoading = false;
         state.updateError = action.payload as string;
@@ -225,7 +236,12 @@ const authSlice = createSlice({
 });
 
 // Export actions and reducer
-export const { clearError, clearFetchSuccess, clearUpdateSuccess, clearUpdateError } = authSlice.actions;
+export const {
+  clearError,
+  clearFetchSuccess,
+  clearUpdateSuccess,
+  clearUpdateError,
+} = authSlice.actions;
 export default authSlice.reducer;
 
 // Selectors
@@ -236,6 +252,8 @@ export const selectIsAuthenticated = (state: RootState) =>
 export const selectAuthLoading = (state: RootState) => state.auth.loading;
 export const selectAuthError = (state: RootState) => state.auth.error;
 export const selectFetchSuccess = (state: RootState) => state.auth.fetchSuccess;
-export const selectUpdateLoading = (state: RootState) => state.auth.updateLoading;
+export const selectUpdateLoading = (state: RootState) =>
+  state.auth.updateLoading;
 export const selectUpdateError = (state: RootState) => state.auth.updateError;
-export const selectUpdateSuccess = (state: RootState) => state.auth.updateSuccess;
+export const selectUpdateSuccess = (state: RootState) =>
+  state.auth.updateSuccess;

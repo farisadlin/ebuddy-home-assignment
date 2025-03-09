@@ -94,19 +94,19 @@ export default function Home() {
   useEffect(() => {
     if (updateSuccess) {
       const timer = setTimeout(() => {
-        dispatch({ type: 'auth/clearUpdateSuccess' });
+        dispatch({ type: "auth/clearUpdateSuccess" });
       }, 3000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [updateSuccess, dispatch]);
-  
+
   useEffect(() => {
     if (fetchSuccess) {
       const timer = setTimeout(() => {
-        dispatch({ type: 'auth/clearFetchSuccess' });
+        dispatch({ type: "auth/clearFetchSuccess" });
       }, 3000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [fetchSuccess, dispatch]);
