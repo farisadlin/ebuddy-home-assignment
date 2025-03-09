@@ -1,4 +1,11 @@
 /**
+ * Shared type definitions for the E-Buddy application
+ * 
+ * This file contains all the shared types used by both frontend and backend.
+ * Import these types in your application code to ensure consistency across the codebase.
+ */
+
+/**
  * User interface representing the structure of user data
  */
 export interface User {
@@ -19,6 +26,15 @@ export interface User {
  * Login request interface for authentication
  */
 export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+/**
+ * Registration request interface
+ */
+export interface RegisterRequest {
+  name: string;
   email: string;
   password: string;
 }
@@ -47,6 +63,16 @@ export interface UserUpdateRequest {
   role?: string;
   isActive?: boolean;
   // Add any additional fields that can be updated
+}
+
+/**
+ * User response interface for API responses
+ */
+export interface UserResponse {
+  success: boolean;
+  data?: User | User[] | null;
+  message?: string;
+  error?: string;
 }
 
 /**
